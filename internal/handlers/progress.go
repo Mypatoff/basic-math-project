@@ -53,6 +53,10 @@ func (h *Handlers) Progress(w http.ResponseWriter, r *http.Request) {
 		}
 		streak++
 	}
+	if err := rows.Err(); err != nil {
+		auth.WriteJSONError(w, http.StatusInternalServerError, "could not load progress")
+		return
+	}
 
 	writeJSON(w, http.StatusOK, map[string]any{
 		"total":    total,
