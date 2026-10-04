@@ -1,0 +1,20 @@
+{{define "content"}}
+<div class="screen">
+	<div class="auth-card">
+		<h1>Log In</h1>
+		<form id="login-form" class="auth-form">
+			<label>
+				Username
+				<input type="text" name="username" required autocomplete="username">
+			</label>
+			<label>
+				Password
+				<input type="password" name="password" required autocomplete="current-password">
+			</label>
+			<button type="submit" class="btn btn-primary">Log In</button>
+		</form>
+		<p id="form-error" class="error"></p>
+		<p class="auth-switch">No account? <a href="/register">Register</a></p>
+	</div>
+</div>
+{{end}}

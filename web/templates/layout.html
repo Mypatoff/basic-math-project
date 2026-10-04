@@ -1,0 +1,26 @@
+{{define "layout.html"}}<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{{.Title}} - Math Practice</title>
+	<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+	<div class="app">
+		{{if or (eq .Title "Practice") (eq .Title "Progress")}}
+		<header id="top-nav" class="top-nav">
+			<span id="greeting"></span>
+			<nav>
+				<a href="/practice">Practice</a>
+				<a href="/progress">Progress</a>
+				<button type="button" id="logout-btn" class="link-btn">Log out</button>
+			</nav>
+		</header>
+		{{end}}
+		{{template "content" .}}
+	</div>
+	<script src="/static/app.js" defer></script>
+</body>
+</html>
+{{end}}

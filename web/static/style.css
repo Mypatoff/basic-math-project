@@ -1,0 +1,399 @@
+:root {
+	--green: #58cc02;
+	--green-dark: #46a302;
+	--blue: #1cb0f6;
+	--blue-dark: #0a94d6;
+	--red: #ff4b4b;
+	--red-dark: #ea2b2b;
+	--bg: #f7f7f7;
+	--card: #ffffff;
+	--text: #3c3c3c;
+	--muted: #afafaf;
+	--border: #e5e5e5;
+	--orange: #ff9600;
+	--orange-dark: #e08600;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html, body {
+	margin: 0;
+	height: 100%;
+}
+
+body {
+	background: var(--bg);
+	color: var(--text);
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Rounded", "Segoe UI", Roboto, Arial, sans-serif;
+	font-size: 16px;
+}
+
+a {
+	color: var(--blue);
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.app {
+	max-width: 600px;
+	min-height: 100vh;
+	margin: 0 auto;
+	padding: 1rem 1.25rem;
+	display: flex;
+	flex-direction: column;
+	position: relative;
+}
+
+.hidden {
+	display: none !important;
+}
+
+/* Chunky buttons: a flat color plus a solid "bottom shadow" that
+   disappears and shifts the button down on press, like it's a
+   physical key being pushed in. */
+.btn {
+	display: block;
+	width: 100%;
+	padding: 0.95rem 1rem;
+	font-size: 1.05rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	border: none;
+	border-radius: 16px;
+	cursor: pointer;
+	color: #fff;
+	transition: transform 0.05s ease, box-shadow 0.05s ease;
+}
+
+.btn-primary {
+	background: var(--green);
+	box-shadow: 0 4px 0 var(--green-dark);
+}
+
+.btn-primary:active {
+	transform: translateY(4px);
+	box-shadow: 0 0 0 var(--green-dark);
+}
+
+.btn-primary:disabled {
+	background: var(--border);
+	color: var(--muted);
+	box-shadow: 0 4px 0 #d0d0d0;
+	cursor: not-allowed;
+}
+
+.link-btn {
+	background: none;
+	border: none;
+	color: var(--blue);
+	font-weight: 700;
+	font-size: 0.95rem;
+	cursor: pointer;
+	padding: 0;
+}
+
+/* Auth pages */
+
+.auth-card {
+	background: var(--card);
+	border-radius: 20px;
+	padding: 2rem 1.5rem;
+	margin: auto 0;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.auth-card h1 {
+	margin-top: 0;
+	font-size: 1.8rem;
+	text-align: center;
+}
+
+.auth-form {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	margin-top: 1.25rem;
+}
+
+.auth-form label {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+	font-weight: 600;
+	font-size: 0.95rem;
+}
+
+.auth-switch {
+	text-align: center;
+	margin-top: 1.25rem;
+	font-size: 0.95rem;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="number"] {
+	width: 100%;
+	padding: 0.9rem 1rem;
+	font-size: 1.1rem;
+	border: 2px solid var(--border);
+	border-radius: 12px;
+	font-family: inherit;
+}
+
+input:focus {
+	border-color: var(--blue);
+	outline: none;
+}
+
+.error {
+	color: var(--red-dark);
+	min-height: 1.2em;
+	font-size: 0.9rem;
+	margin: 0.5rem 0 0;
+}
+
+/* Top nav, shown on practice/progress pages (hidden during a lesson) */
+
+.top-nav {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0.5rem 0 1rem;
+	font-weight: 700;
+}
+
+.top-nav nav a {
+	margin-right: 1rem;
+}
+
+/* Full-screen sections that get shown/hidden with .hidden */
+
+.screen {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	gap: 1.5rem;
+	padding: 1.5rem 0;
+}
+
+.screen h1 {
+	font-size: 1.8rem;
+	margin: 0;
+}
+
+/* Difficulty chips */
+
+.chip-row {
+	display: flex;
+	gap: 1rem;
+}
+
+.chip {
+	width: 64px;
+	height: 64px;
+	font-size: 1.6rem;
+	font-weight: 700;
+	background: #fff;
+	color: var(--blue);
+	border: 2px solid var(--blue);
+	border-radius: 16px;
+	box-shadow: 0 4px 0 var(--blue-dark);
+	cursor: pointer;
+	transition: transform 0.05s ease, box-shadow 0.05s ease;
+}
+
+.chip:active {
+	transform: translateY(4px);
+	box-shadow: 0 0 0 var(--blue-dark);
+}
+
+/* Lesson screen */
+
+#lesson-screen {
+	justify-content: flex-start;
+}
+
+.lesson-topbar {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.5rem 0;
+}
+
+.icon-btn {
+	background: none;
+	border: none;
+	font-size: 1.6rem;
+	line-height: 1;
+	color: var(--muted);
+	cursor: pointer;
+	padding: 0.25rem;
+}
+
+.progress-track {
+	flex: 1;
+	height: 16px;
+	background: var(--border);
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.progress-fill {
+	height: 100%;
+	width: 0%;
+	background: var(--green);
+	border-radius: 8px;
+	transition: width 0.3s ease;
+}
+
+.lesson-body {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 1.5rem;
+	text-align: center;
+	width: 100%;
+}
+
+.question {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin: 0;
+}
+
+.big-input {
+	width: 60%;
+	text-align: center;
+	font-size: 2rem;
+}
+
+.lesson-footer {
+	padding: 1rem 0 2rem;
+}
+
+/* Feedback panel: docked off-screen by default, slides up on .show */
+
+.feedback-panel {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	max-width: 600px;
+	margin: 0 auto;
+	padding: 1.5rem 1.25rem 2rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1rem;
+	border-radius: 20px 20px 0 0;
+	transform: translateY(100%);
+	transition: transform 0.25s ease;
+	box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.feedback-panel.show {
+	transform: translateY(0);
+}
+
+.feedback-panel.correct {
+	background: #d7ffb8;
+}
+
+.feedback-panel.wrong {
+	background: #ffdfe0;
+}
+
+.feedback-text {
+	font-size: 1.3rem;
+	font-weight: 700;
+	margin: 0;
+}
+
+.feedback-panel.correct .feedback-text {
+	color: var(--green-dark);
+}
+
+.feedback-panel.wrong .feedback-text {
+	color: var(--red-dark);
+}
+
+.feedback-panel .btn-primary {
+	max-width: 360px;
+	margin: 0 auto;
+}
+
+.score-text {
+	font-size: 1.3rem;
+	font-weight: 700;
+}
+
+/* Progress page stat cards: same chunky, bottom-shadow look as the
+   chips and buttons, just not pressable. */
+
+.stat-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 1rem;
+	width: 100%;
+}
+
+.stat-card {
+	background: var(--card);
+	border-radius: 18px;
+	padding: 1.25rem 0.5rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.4rem;
+	box-shadow: 0 4px 0 var(--border);
+}
+
+.stat-icon {
+	font-size: 1.8rem;
+	line-height: 1;
+}
+
+.stat-value {
+	font-size: 1.6rem;
+	font-weight: 700;
+}
+
+.stat-label {
+	font-size: 0.8rem;
+	font-weight: 700;
+	color: var(--muted);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.stat-streak {
+	box-shadow: 0 4px 0 var(--orange-dark);
+}
+
+.stat-streak .stat-value {
+	color: var(--orange);
+}
+
+.stat-accuracy {
+	box-shadow: 0 4px 0 var(--blue-dark);
+}
+
+.stat-accuracy .stat-value {
+	color: var(--blue);
+}
+
+.stat-total {
+	box-shadow: 0 4px 0 var(--green-dark);
+}
+
+.stat-total .stat-value {
+	color: var(--green);
+}
