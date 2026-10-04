@@ -1,4 +1,32 @@
+# My additions
 app.db
 app.db-*
+
+# Binaries for programs and plugins
 *.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Code coverage profiles and other test artifacts
+*.out
+coverage.*
+!coverage.go
+*.coverprofile
+profile.cov
+
+# Go workspace file
+go.work
+go.work.sum
+
+# env file
 .env
+
+# Editor/IDE
+# .idea/
+# .vscode/
+0cde13bd613774934503e8c6e524c6009dc6b3c0
