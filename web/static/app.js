@@ -1,6 +1,8 @@
 // Small helper: send/receive JSON. On any 401 we redirect to /login
 // immediately, since that means the session is missing or expired;
-// callers don't need to handle 401 themselves.
+// callers don't need to handle 401 themselves. The response status is
+// attached to thrown errors so callers that DO need to branch on it
+// (e.g. the lesson page handling 403/404) can.
 async function api(method, path, body) {
 	const res = await fetch(path, {
 		method,
@@ -10,12 +12,16 @@ async function api(method, path, body) {
 
 	if (res.status === 401) {
 		window.location.href = "/login";
-		throw new Error("not logged in");
+		const err = new Error("not logged in");
+		err.status = 401;
+		throw err;
 	}
 
 	const data = await res.json().catch(() => ({}));
 	if (!res.ok) {
-		throw new Error(data.error || "request failed");
+		const err = new Error(data.error || "request failed");
+		err.status = res.status;
+		throw err;
 	}
 	return data;
 }
@@ -43,57 +49,68 @@ function setupAuthForm(formId, path, redirectTo) {
 	});
 }
 
-setupAuthForm("login-form", "/api/login", "/practice");
-setupAuthForm("register-form", "/api/register", "/practice");
+setupAuthForm("login-form", "/api/login", "/");
+setupAuthForm("register-form", "/api/register", "/");
 
-// --- Shared nav: greeting + logout, present on any page that has it ---
+// --- Levels page: fetch /api/levels and build the path ---
 
-function initNav() {
-	const topNav = document.getElementById("top-nav");
-	if (!topNav) return; // login/register pages don't render the nav
+function initLevels() {
+	const pathEl = document.getElementById("level-path");
+	if (!pathEl) return; // not on the levels page
 
-	const greeting = document.getElementById("greeting");
-	const logoutBtn = document.getElementById("logout-btn");
+	api("GET", "/api/levels")
+		.then((levels) => {
+			pathEl.textContent = "";
+			levels.forEach((level) => {
+				const node = document.createElement(level.unlocked ? "a" : "div");
+				node.className = "level-node " + (level.passed ? "passed" : level.unlocked ? "unlocked" : "locked");
+				if (level.unlocked) node.href = `/level/${level.id}`;
 
-	api("GET", "/api/me")
-		.then((me) => showText(greeting, `Hi, ${me.username}!`))
-		.catch(() => {}); // api() already redirects to /login on 401
+				const circle = document.createElement("span");
+				circle.className = "level-circle";
+				showText(circle, level.passed ? "✓" : level.unlocked ? String(level.id) : "🔒");
+				node.appendChild(circle);
 
-	logoutBtn.addEventListener("click", async () => {
-		await api("POST", "/api/logout");
-		window.location.href = "/login";
-	});
-}
+				const title = document.createElement("span");
+				title.className = "level-title";
+				showText(title, level.title);
+				node.appendChild(title);
 
-// --- Progress page: fetch and display the stat cards ---
+				if (level.passed) {
+					const score = document.createElement("span");
+					score.className = "level-score";
+					showText(score, `${level.best_score}/5`);
+					node.appendChild(score);
+				}
 
-function initProgress() {
-	const streakEl = document.getElementById("stat-streak");
-	if (!streakEl) return; // not on the progress page
-
-	const accuracyEl = document.getElementById("stat-accuracy");
-	const totalEl = document.getElementById("stat-total");
-
-	api("GET", "/api/progress")
-		.then((p) => {
-			showText(streakEl, String(p.streak));
-			showText(accuracyEl, Math.round(p.accuracy * 100) + "%");
-			showText(totalEl, String(p.total));
+				pathEl.appendChild(node);
+			});
 		})
 		.catch(() => {}); // api() already redirects to /login on 401
 }
 
-// --- Practice page: difficulty picker -> 10-question lesson -> score ---
+// --- Lesson page: start -> 5 questions -> end screen ---
 
-function initPractice() {
-	const startScreen = document.getElementById("start-screen");
-	if (!startScreen) return; // not on the practice page
+// handleApiError centralizes the lesson page's error handling: 403
+// (locked level) and 404 (unknown level/lesson/task) send the user
+// home; 401 is already being handled by api() itself. Anything else
+// is left for the caller to show inline. Returns true if handled.
+function handleApiError(err) {
+	if (err.status === 403 || err.status === 404) {
+		window.location.href = "/";
+		return true;
+	}
+	return err.status === 401;
+}
 
-	const topNav = document.getElementById("top-nav");
+function initLesson() {
+	const root = document.getElementById("lesson-root");
+	if (!root) return; // not on the lesson page
+	const levelID = root.dataset.levelId;
+
 	const lessonScreen = document.getElementById("lesson-screen");
-	const completeScreen = document.getElementById("complete-screen");
-	const chips = document.querySelectorAll(".chip");
-	const backBtn = document.getElementById("back-btn");
+	const lessonFooter = document.querySelector(".lesson-footer");
+	const endScreen = document.getElementById("end-screen");
 	const progressFill = document.getElementById("progress-fill");
 	const questionEl = document.getElementById("question");
 	const answerInput = document.getElementById("answer-input");
@@ -102,70 +119,59 @@ function initPractice() {
 	const feedbackPanel = document.getElementById("feedback-panel");
 	const feedbackText = document.getElementById("feedback-text");
 	const continueBtn = document.getElementById("continue-btn");
-	const scoreText = document.getElementById("score-text");
-	const againBtn = document.getElementById("again-btn");
+	const endTitle = document.getElementById("end-title");
+	const endScore = document.getElementById("end-score");
+	const endMessage = document.getElementById("end-message");
+	const retryBtn = document.getElementById("retry-btn");
 
-	const LESSON_LENGTH = 10;
-	let difficulty = 1;
-	let questionIndex = 0;
-	let correctCount = 0;
+	const TOTAL = 5;
+	let lessonID = null;
 	let currentTaskID = null;
-	let answered = false;
+	let currentNumber = 0;
+	let lastResult = null;
 
-	function showScreen(screen) {
-		[startScreen, lessonScreen, completeScreen].forEach((s) => s.classList.add("hidden"));
-		screen.classList.remove("hidden");
-		topNav.classList.toggle("hidden", screen === lessonScreen);
+	function updateProgress(completed) {
+		progressFill.style.width = (completed / TOTAL) * 100 + "%";
 	}
 
-	function updateProgress() {
-		progressFill.style.width = (questionIndex / LESSON_LENGTH) * 100 + "%";
-	}
-
-	async function loadQuestion() {
-		answered = false;
+	async function loadNext() {
+		lastResult = null;
 		showText(lessonError, "");
 		feedbackPanel.classList.remove("show", "correct", "wrong");
 		answerInput.value = "";
-		checkBtn.disabled = false;
-		updateProgress();
 		try {
-			const task = await api("GET", `/api/tasks/next?d=${difficulty}`);
+			const task = await api("GET", `/api/lessons/${lessonID}/next`);
 			currentTaskID = task.task_id;
+			currentNumber = task.number;
+			updateProgress(currentNumber - 1);
 			showText(questionEl, task.question);
 			answerInput.focus();
 		} catch (err) {
-			showText(lessonError, err.message);
+			if (!handleApiError(err)) showText(lessonError, err.message);
 		}
 	}
 
-	function startLesson(difficultyLevel) {
-		difficulty = difficultyLevel;
-		questionIndex = 0;
-		correctCount = 0;
-		showScreen(lessonScreen);
-		loadQuestion();
+	async function startLesson() {
+		try {
+			const start = await api("POST", `/api/levels/${levelID}/start`);
+			lessonID = start.lesson_id;
+			await loadNext();
+		} catch (err) {
+			if (!handleApiError(err)) showText(lessonError, err.message);
+		}
 	}
 
-	chips.forEach((chip) => {
-		chip.addEventListener("click", () => startLesson(Number(chip.dataset.difficulty)));
-	});
-
-	backBtn.addEventListener("click", () => showScreen(startScreen));
-
 	async function checkAnswer() {
-		if (answered || answerInput.value === "") return;
+		if (lastResult || answerInput.value === "") return;
 		showText(lessonError, "");
 		try {
 			const result = await api("POST", "/api/tasks/answer", {
 				task_id: currentTaskID,
 				answer: Number(answerInput.value),
 			});
-			answered = true;
-			questionIndex++;
-			updateProgress();
+			lastResult = result;
+			updateProgress(currentNumber);
 			if (result.correct) {
-				correctCount++;
 				feedbackPanel.classList.add("correct");
 				showText(feedbackText, "Nice!");
 			} else {
@@ -174,7 +180,24 @@ function initPractice() {
 			}
 			feedbackPanel.classList.add("show");
 		} catch (err) {
-			showText(lessonError, err.message);
+			if (!handleApiError(err)) showText(lessonError, err.message);
+		}
+	}
+
+	function showEnd() {
+		const { score, passed, next_unlocked } = lastResult;
+
+		lessonScreen.classList.add("hidden");
+		lessonFooter.classList.add("hidden");
+		feedbackPanel.classList.remove("show");
+		endScreen.classList.remove("hidden");
+
+		showText(endTitle, passed ? "Level passed!" : "Lesson complete");
+		showText(endScore, `${score} / ${TOTAL}`);
+		if (passed) {
+			showText(endMessage, next_unlocked ? `Level ${Number(levelID) + 1} unlocked.` : "You've mastered this level.");
+		} else {
+			showText(endMessage, "Need 4/5 to pass. Give it another go!");
 		}
 	}
 
@@ -187,19 +210,73 @@ function initPractice() {
 	});
 
 	continueBtn.addEventListener("click", () => {
-		if (questionIndex >= LESSON_LENGTH) {
-			showText(scoreText, `You got ${correctCount} / ${LESSON_LENGTH} correct.`);
-			showScreen(completeScreen);
+		if (lastResult && lastResult.finished) {
+			showEnd();
 		} else {
-			loadQuestion();
+			loadNext();
 		}
 	});
 
-	againBtn.addEventListener("click", () => showScreen(startScreen));
+	retryBtn.addEventListener("click", () => {
+		endScreen.classList.add("hidden");
+		lessonScreen.classList.remove("hidden");
+		lessonFooter.classList.remove("hidden");
+		startLesson();
+	});
 
-	showScreen(startScreen);
+	startLesson();
 }
 
-initNav();
-initPractice();
-initProgress();
+// --- Account page: profile, stats, change password, logout ---
+
+function initAccount() {
+	const usernameEl = document.getElementById("account-username");
+	if (!usernameEl) return; // not on the account page
+
+	const sinceEl = document.getElementById("account-since");
+	const streakEl = document.getElementById("stat-streak");
+	const accuracyEl = document.getElementById("stat-accuracy");
+	const totalEl = document.getElementById("stat-total");
+	const passwordForm = document.getElementById("password-form");
+	const passwordStatus = document.getElementById("password-status");
+	const logoutBtn = document.getElementById("logout-btn");
+
+	api("GET", "/api/me")
+		.then((me) => {
+			showText(usernameEl, me.username);
+			showText(sinceEl, me.created_at.slice(0, 10));
+		})
+		.catch(() => {});
+
+	api("GET", "/api/progress")
+		.then((p) => {
+			showText(streakEl, String(p.streak));
+			showText(accuracyEl, Math.round(p.accuracy * 100) + "%");
+			showText(totalEl, String(p.total));
+		})
+		.catch(() => {});
+
+	passwordForm.addEventListener("submit", async (e) => {
+		e.preventDefault();
+		passwordStatus.classList.remove("success");
+		showText(passwordStatus, "");
+		const data = Object.fromEntries(new FormData(passwordForm));
+		try {
+			await api("POST", "/api/account/password", data);
+			passwordStatus.classList.add("success");
+			showText(passwordStatus, "Password updated.");
+			passwordForm.reset();
+		} catch (err) {
+			showText(passwordStatus, err.message);
+		}
+	});
+
+	logoutBtn.addEventListener("click", async () => {
+		await api("POST", "/api/logout");
+		window.location.href = "/login";
+	});
+}
+
+initLevels();
+initLesson();
+initAccount();

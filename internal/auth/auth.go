@@ -140,12 +140,40 @@ func (s *Store) Logout(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// Username looks up a user's name by id, used to greet them in the UI.
-func (s *Store) Username(userID int64) (string, error) {
-	var username string
-	row := s.DB.QueryRow(`SELECT username FROM users WHERE id = ?`, userID)
-	if err := row.Scan(&username); err != nil {
-		return "", err
+// UserInfo returns a user's username and account creation time, for
+// the /api/me endpoint.
+func (s *Store) UserInfo(userID int64) (username string, createdAt time.Time, err error) {
+	row := s.DB.QueryRow(`SELECT username, created_at FROM users WHERE id = ?`, userID)
+	err = row.Scan(&username, &createdAt)
+	return username, createdAt, err
+}
+
+// ChangePassword verifies the current password, stores the new one,
+// and deletes every other session for this user — so a session on
+// another device is logged out — while keeping the session that made
+// this request alive.
+func (s *Store) ChangePassword(r *http.Request, userID int64, current, newPassword string) error {
+	var hash string
+	row := s.DB.QueryRow(`SELECT password_hash FROM users WHERE id = ?`, userID)
+	if err := row.Scan(&hash); err != nil {
+		return err
 	}
-	return username, nil
+	if bcrypt.CompareHashAndPassword([]byte(hash), []byte(current)) != nil {
+		return ErrInvalidCredentials
+	}
+
+	newHash, err := hashPassword(newPassword)
+	if err != nil {
+		return err
+	}
+	if _, err := s.DB.Exec(`UPDATE users SET password_hash = ? WHERE id = ?`, newHash, userID); err != nil {
+		return err
+	}
+
+	var currentToken string
+	if cookie, err := r.Cookie(sessionCookieName); err == nil {
+		currentToken = cookie.Value
+	}
+	_, err = s.DB.Exec(`DELETE FROM sessions WHERE user_id = ? AND token != ?`, userID, currentToken)
+	return err
 }

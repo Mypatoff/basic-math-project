@@ -1,0 +1,42 @@
+{{define "content"}}
+<section class="account-page">
+	<h1>Account</h1>
+
+	<div class="account-info">
+		<p><span class="info-label">Username</span><span id="account-username"></span></p>
+		<p><span class="info-label">Member since</span><span id="account-since"></span></p>
+	</div>
+
+	<div class="stat-grid">
+		<div class="stat-card stat-streak">
+			<span class="stat-icon" aria-hidden="true">🔥</span>
+			<span id="stat-streak" class="stat-value">0</span>
+			<span class="stat-label">Streak</span>
+		</div>
+		<div class="stat-card stat-accuracy">
+			<span id="stat-accuracy" class="stat-value">0%</span>
+			<span class="stat-label">Accuracy</span>
+		</div>
+		<div class="stat-card stat-total">
+			<span id="stat-total" class="stat-value">0</span>
+			<span class="stat-label">Total</span>
+		</div>
+	</div>
+
+	<h2>Change password</h2>
+	<form id="password-form" class="auth-form">
+		<label>
+			Current password
+			<input type="password" name="current" required autocomplete="current-password">
+		</label>
+		<label>
+			New password (8+ characters)
+			<input type="password" name="new" required minlength="8" autocomplete="new-password">
+		</label>
+		<button type="submit" class="btn btn-primary">Update password</button>
+	</form>
+	<p id="password-status" class="error"></p>
+
+	<button type="button" id="logout-btn" class="btn btn-secondary">Log out</button>
+</section>
+{{end}}

@@ -23,7 +23,7 @@ type Handlers struct {
 // Each one defines a "content" block; if we parsed them all into one
 // shared *template.Template, their "content" blocks would overwrite
 // each other, so New gives each page its own template set instead.
-var pageNames = []string{"login.html", "register.html", "practice.html", "progress.html"}
+var pageNames = []string{"landing.html", "levels.html", "login.html", "register.html", "lesson.html", "account.html"}
 
 // New parses layout.html together with each page once at startup.
 // Parsing up front (instead of per-request) is both faster and

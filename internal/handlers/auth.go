@@ -72,10 +72,13 @@ func (h *Handlers) Logout(w http.ResponseWriter, r *http.Request) {
 // to decide whether to show the practice UI or bounce to /login.
 func (h *Handlers) Me(w http.ResponseWriter, r *http.Request) {
 	userID := auth.UserIDFromContext(r)
-	username, err := h.Auth.Username(userID)
+	username, createdAt, err := h.Auth.UserInfo(userID)
 	if err != nil {
 		auth.WriteJSONError(w, http.StatusInternalServerError, "could not load user")
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]string{"username": username})
+	writeJSON(w, http.StatusOK, map[string]any{
+		"username":   username,
+		"created_at": createdAt,
+	})
 }

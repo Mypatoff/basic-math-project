@@ -1,17 +1,17 @@
 :root {
+	--bg: #121826;
+	--card: #1b2333;
+	--border: #2a3447;
+	--text: #e6eaf2;
+	--muted: #8b95a8;
 	--green: #58cc02;
-	--green-dark: #46a302;
-	--blue: #1cb0f6;
-	--blue-dark: #0a94d6;
-	--red: #ff4b4b;
-	--red-dark: #ea2b2b;
-	--bg: #f7f7f7;
-	--card: #ffffff;
-	--text: #3c3c3c;
-	--muted: #afafaf;
-	--border: #e5e5e5;
+	--green-dark: #3f9102;
+	--blue: #4aa8ff;
+	--blue-dark: #2f86d6;
+	--red: #ff5c5c;
+	--red-dark: #e23f3f;
 	--orange: #ff9600;
-	--orange-dark: #e08600;
+	--orange-dark: #c97600;
 }
 
 * {
@@ -37,10 +37,10 @@ a {
 }
 
 .app {
-	max-width: 600px;
+	max-width: 640px;
 	min-height: 100vh;
 	margin: 0 auto;
-	padding: 1rem 1.25rem;
+	padding: 0 1.25rem;
 	display: flex;
 	flex-direction: column;
 	position: relative;
@@ -48,6 +48,52 @@ a {
 
 .hidden {
 	display: none !important;
+}
+
+/* Navbar + footer */
+
+.navbar {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 1rem 0;
+	border-bottom: 1px solid var(--border);
+	margin-bottom: 1.5rem;
+}
+
+.navbar .brand {
+	color: var(--text);
+	font-size: 1.25rem;
+	font-weight: 800;
+}
+
+.navbar nav a {
+	margin-left: 1.25rem;
+	color: var(--muted);
+	font-weight: 700;
+}
+
+.navbar nav a:hover {
+	color: var(--text);
+}
+
+.site-footer {
+	margin-top: auto;
+	padding: 2rem 0 1.5rem;
+	text-align: center;
+	color: var(--muted);
+	font-size: 0.85rem;
+	border-top: 1px solid var(--border);
+}
+
+@media (max-width: 420px) {
+	.navbar .brand {
+		font-size: 1.1rem;
+	}
+	.navbar nav a {
+		margin-left: 0.85rem;
+		font-size: 0.9rem;
+	}
 }
 
 /* Chunky buttons: a flat color plus a solid "bottom shadow" that
@@ -61,6 +107,7 @@ a {
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 0.5px;
+	text-align: center;
 	border: none;
 	border-radius: 16px;
 	cursor: pointer;
@@ -81,8 +128,18 @@ a {
 .btn-primary:disabled {
 	background: var(--border);
 	color: var(--muted);
-	box-shadow: 0 4px 0 #d0d0d0;
+	box-shadow: 0 4px 0 #0e131d;
 	cursor: not-allowed;
+}
+
+.btn-secondary {
+	background: var(--blue);
+	box-shadow: 0 4px 0 var(--blue-dark);
+}
+
+.btn-secondary:active {
+	transform: translateY(4px);
+	box-shadow: 0 0 0 var(--blue-dark);
 }
 
 .link-btn {
@@ -99,10 +156,10 @@ a {
 
 .auth-card {
 	background: var(--card);
+	border: 1px solid var(--border);
 	border-radius: 20px;
 	padding: 2rem 1.5rem;
 	margin: auto 0;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .auth-card h1 {
@@ -138,8 +195,10 @@ input[type="number"] {
 	width: 100%;
 	padding: 0.9rem 1rem;
 	font-size: 1.1rem;
+	background: var(--bg);
 	border: 2px solid var(--border);
 	border-radius: 12px;
+	color: var(--text);
 	font-family: inherit;
 }
 
@@ -155,18 +214,8 @@ input:focus {
 	margin: 0.5rem 0 0;
 }
 
-/* Top nav, shown on practice/progress pages (hidden during a lesson) */
-
-.top-nav {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 0.5rem 0 1rem;
-	font-weight: 700;
-}
-
-.top-nav nav a {
-	margin-right: 1rem;
+.error.success {
+	color: var(--green);
 }
 
 /* Full-screen sections that get shown/hidden with .hidden */
@@ -187,36 +236,159 @@ input:focus {
 	margin: 0;
 }
 
-/* Difficulty chips */
+/* Landing page hero */
 
-.chip-row {
+.hero {
 	display: flex;
-	gap: 1rem;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	gap: 1.25rem;
+	padding: 3rem 0 2rem;
 }
 
-.chip {
-	width: 64px;
-	height: 64px;
-	font-size: 1.6rem;
+.hero h1 {
+	font-size: 2rem;
+	margin: 0;
+}
+
+.hero-sub {
+	color: var(--muted);
+	font-size: 1.05rem;
+	max-width: 440px;
+}
+
+.hero-actions {
+	display: flex;
+	gap: 1rem;
+	width: 100%;
+	max-width: 320px;
+}
+
+.hero-actions .btn {
+	flex: 1;
+}
+
+.feature-list {
+	list-style: none;
+	padding: 0;
+	margin: 1rem 0 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+	color: var(--muted);
+	text-align: left;
+	width: 100%;
+	max-width: 420px;
+}
+
+.feature-list li {
+	padding-left: 1.5rem;
+	position: relative;
+}
+
+.feature-list li::before {
+	content: "\2713";
+	position: absolute;
+	left: 0;
+	color: var(--green);
 	font-weight: 700;
-	background: #fff;
-	color: var(--blue);
-	border: 2px solid var(--blue);
-	border-radius: 16px;
-	box-shadow: 0 4px 0 var(--blue-dark);
-	cursor: pointer;
+}
+
+/* Levels page: a vertical path of round level buttons, alternating
+   slightly left/right via nth-child. */
+
+.levels-page {
+	padding: 1rem 0 2rem;
+}
+
+.levels-page h1 {
+	text-align: center;
+	margin-bottom: 2rem;
+}
+
+.level-path {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2rem;
+}
+
+.level-node {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.4rem;
+	width: 130px;
+}
+
+.level-path .level-node:nth-child(odd) {
+	transform: translateX(-28px);
+}
+
+.level-path .level-node:nth-child(even) {
+	transform: translateX(28px);
+}
+
+.level-circle {
+	width: 72px;
+	height: 72px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.5rem;
+	font-weight: 800;
+	color: #fff;
 	transition: transform 0.05s ease, box-shadow 0.05s ease;
 }
 
-.chip:active {
-	transform: translateY(4px);
-	box-shadow: 0 0 0 var(--blue-dark);
+.level-node.unlocked .level-circle,
+.level-node.passed .level-circle {
+	background: var(--green);
+	box-shadow: 0 4px 0 var(--green-dark);
 }
 
-/* Lesson screen */
+.level-node.unlocked:active .level-circle,
+.level-node.passed:active .level-circle {
+	transform: translateY(4px);
+	box-shadow: 0 0 0 var(--green-dark);
+}
 
-#lesson-screen {
-	justify-content: flex-start;
+.level-node.locked {
+	cursor: not-allowed;
+}
+
+.level-node.locked .level-circle {
+	background: var(--border);
+	color: var(--muted);
+	box-shadow: 0 4px 0 #0e131d;
+}
+
+.level-title {
+	font-size: 0.8rem;
+	font-weight: 700;
+	color: var(--text);
+	text-align: center;
+}
+
+.level-node.locked .level-title {
+	color: var(--muted);
+}
+
+.level-score {
+	font-size: 0.75rem;
+	font-weight: 700;
+	color: var(--green);
+}
+
+/* Lesson page */
+
+.lesson-page {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	padding: 1rem 0;
 }
 
 .lesson-topbar {
@@ -226,12 +398,14 @@ input:focus {
 	padding: 0.5rem 0;
 }
 
-.icon-btn {
+.icon-btn,
+.icon-btn:visited {
 	background: none;
 	border: none;
 	font-size: 1.6rem;
 	line-height: 1;
 	color: var(--muted);
+	font-weight: 400;
 	cursor: pointer;
 	padding: 0.25rem;
 }
@@ -250,17 +424,6 @@ input:focus {
 	background: var(--green);
 	border-radius: 8px;
 	transition: width 0.3s ease;
-}
-
-.lesson-body {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	gap: 1.5rem;
-	text-align: center;
-	width: 100%;
 }
 
 .question {
@@ -286,7 +449,7 @@ input:focus {
 	left: 0;
 	right: 0;
 	bottom: 0;
-	max-width: 600px;
+	max-width: 640px;
 	margin: 0 auto;
 	padding: 1.5rem 1.25rem 2rem;
 	display: flex;
@@ -296,7 +459,7 @@ input:focus {
 	border-radius: 20px 20px 0 0;
 	transform: translateY(100%);
 	transition: transform 0.25s ease;
-	box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+	box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.35);
 }
 
 .feedback-panel.show {
@@ -304,11 +467,11 @@ input:focus {
 }
 
 .feedback-panel.correct {
-	background: #d7ffb8;
+	background: #173a16;
 }
 
 .feedback-panel.wrong {
-	background: #ffdfe0;
+	background: #3a1717;
 }
 
 .feedback-text {
@@ -318,11 +481,11 @@ input:focus {
 }
 
 .feedback-panel.correct .feedback-text {
-	color: var(--green-dark);
+	color: var(--green);
 }
 
 .feedback-panel.wrong .feedback-text {
-	color: var(--red-dark);
+	color: var(--red);
 }
 
 .feedback-panel .btn-primary {
@@ -335,18 +498,27 @@ input:focus {
 	font-weight: 700;
 }
 
-/* Progress page stat cards: same chunky, bottom-shadow look as the
-   chips and buttons, just not pressable. */
+#end-screen .btn {
+	max-width: 320px;
+}
+
+#end-message {
+	color: var(--muted);
+}
+
+/* Stat cards: used on the account page */
 
 .stat-grid {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
 	gap: 1rem;
 	width: 100%;
+	margin: 1.5rem 0;
 }
 
 .stat-card {
 	background: var(--card);
+	border: 1px solid var(--border);
 	border-radius: 18px;
 	padding: 1.25rem 0.5rem;
 	display: flex;
@@ -396,4 +568,37 @@ input:focus {
 
 .stat-total .stat-value {
 	color: var(--green);
+}
+
+/* Account page */
+
+.account-page h2 {
+	margin-top: 2rem;
+	font-size: 1.1rem;
+}
+
+.account-info {
+	background: var(--card);
+	border: 1px solid var(--border);
+	border-radius: 16px;
+	padding: 1.1rem 1.5rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	margin-top: 1rem;
+}
+
+.account-info p {
+	margin: 0;
+	display: flex;
+	justify-content: space-between;
+}
+
+.info-label {
+	color: var(--muted);
+	font-weight: 700;
+}
+
+#logout-btn {
+	margin-top: 2rem;
 }

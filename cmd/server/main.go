@@ -48,7 +48,8 @@ func main() {
 	mux.HandleFunc("GET /{$}", h.Index) // {$} matches "/" only, not every path
 	mux.HandleFunc("GET /login", h.LoginPage)
 	mux.HandleFunc("GET /register", h.RegisterPage)
-	mux.HandleFunc("GET /practice", h.PracticePage)
+	mux.HandleFunc("GET /level/{id}", h.LessonPage)
+	mux.HandleFunc("GET /account", h.AccountPage)
 	mux.HandleFunc("GET /progress", h.ProgressPage)
 
 	// Static assets (style.css, app.js) served straight from the
@@ -66,10 +67,14 @@ func main() {
 	mux.HandleFunc("POST /api/answer", authStore.RequireAuth(h.SubmitAnswer))
 	mux.HandleFunc("GET /api/stats", authStore.RequireAuth(h.Stats))
 
-	// Difficulty-aware tasks API.
-	mux.HandleFunc("GET /api/tasks/next", authStore.RequireAuth(h.NextTask))
+	// Levels/lessons API.
+	mux.HandleFunc("GET /api/levels", authStore.RequireAuth(h.Levels))
+	mux.HandleFunc("POST /api/levels/{id}/start", authStore.RequireAuth(h.StartLevel))
+	mux.HandleFunc("GET /api/lessons/{id}/next", authStore.RequireAuth(h.NextInLesson))
 	mux.HandleFunc("POST /api/tasks/answer", authStore.RequireAuth(h.AnswerTask))
 	mux.HandleFunc("GET /api/progress", authStore.RequireAuth(h.Progress))
+
+	mux.HandleFunc("POST /api/account/password", authStore.RequireAuth(h.ChangePassword))
 
 	addr := ":8080"
 	log.Printf("listening on %s", addr)
